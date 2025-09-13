@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/exercise_screen.dart';
 import 'screens/food_screen.dart';
-import 'screens/ai_monitor_screen.dart';
 import 'screens/schedule_screen.dart';
 
 void main() {
@@ -31,7 +30,6 @@ class _MainNavigationState extends State<MainNavigation> {
     HomeScreen(),
     ExerciseScreen(),
     FoodScreen(),
-    AiMonitorScreen(),
     ScheduleScreen(),
   ];
 
@@ -54,10 +52,6 @@ class _MainNavigationState extends State<MainNavigation> {
             label: 'Exercise',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Food'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.smart_toy),
-            label: 'AI Monitor',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Schedule',
