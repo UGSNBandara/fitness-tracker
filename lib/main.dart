@@ -3,6 +3,7 @@ import 'screens/home_screen.dart';
 import 'screens/exercise_screen.dart';
 import 'screens/food_screen.dart';
 import 'screens/schedule_screen.dart';
+import 'screens/auth/auth_screen.dart';
 
 void main() {
   runApp(FitnessApp());
@@ -11,10 +12,12 @@ void main() {
 class FitnessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // TODO: Replace with real authentication logic
+    bool isAuthenticated = true;
     return MaterialApp(
       title: 'Fitness App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainNavigation(),
+      home: isAuthenticated ? MainNavigation() : AuthScreen(),
     );
   }
 }
