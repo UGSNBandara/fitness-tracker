@@ -57,4 +57,4 @@ class MealEntry {
   }
 }
 
-enum MealSource { MANUAL, CAMERA, BARCODE }
+enum MealSource { manual, camera, barcode }

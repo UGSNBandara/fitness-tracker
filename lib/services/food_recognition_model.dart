@@ -1,5 +1,3 @@
-import '../models/food_item.dart';
-
 class FoodRecognitionModel {
   Future<List<FoodItemProb>> detectFood(dynamic image) async {
     // TODO: Implement food detection

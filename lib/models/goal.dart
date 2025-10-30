@@ -12,15 +12,15 @@ class Goal {
   });
 }
 
-enum GoalType { WEIGHT, CALORIES, PROTEIN, STEPS, WORKOUTS_PER_WEEK }
+enum GoalType { weight, calories, protein, steps, workoutsPerWeek }
 
 enum GoalMetricDetail {
-  NET_INTAKE,
-  BURNED,
-  GRAMS,
-  PERCENTAGE_OF_CALORIES,
-  DURATION_MINUTES,
-  SESSIONS_COMPLETED,
+  netIntake,
+  burned,
+  grams,
+  percentageOfCalories,
+  durationMinutes,
+  sessionsCompleted,
 }
 
 class Period {

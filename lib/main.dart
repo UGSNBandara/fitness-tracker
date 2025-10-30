@@ -1,63 +1,25 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
-import 'screens/exercise_screen.dart';
-import 'screens/food_screen.dart';
-import 'screens/schedule_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'screens/auth_gate.dart';
+// Screens are imported indirectly by the AuthGate as needed
 
-void main() {
-  runApp(FitnessApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const FitnessApp());
 }
 
 class FitnessApp extends StatelessWidget {
+  const FitnessApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fitness App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainNavigation(),
+      home: const AuthGate(),
     );
   }
 }
 
-class MainNavigation extends StatefulWidget {
-  @override
-  _MainNavigationState createState() => _MainNavigationState();
-}
-
-class _MainNavigationState extends State<MainNavigation> {
-  int _selectedIndex = 0;
-  final List<Widget> _screens = [
-    HomeScreen(),
-    ExerciseScreen(),
-    FoodScreen(),
-    ScheduleScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Exercise',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Food'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
-        ],
-      ),
-    );
-  }
-}
+// MainNavigation is defined in screens/main_navigation.dart

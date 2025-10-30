@@ -1,5 +1,1 @@
-enum UserLevel {
-  BEGINNER,
-  INTERMEDIATE,
-  ADVANCED,
-}
+enum UserLevel { beginner, intermediate, advanced }

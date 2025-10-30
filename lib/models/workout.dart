@@ -1,8 +1,4 @@
-enum WorkoutStatus {
-  PLANNED,
-  IN_PROGRESS,
-  DONE,
-}
+enum WorkoutStatus { planned, inProgress, done }
 
 class Workout {
   final String workoutId;
