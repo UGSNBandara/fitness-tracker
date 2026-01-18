@@ -411,7 +411,7 @@ class _ExerciseMarkingDialog extends StatefulWidget {
 
 class _ExerciseMarkingDialogState extends State<_ExerciseMarkingDialog> {
   late List<bool> _completedSets;
-  final _rpeController = TextEditingController(text: '5');
+  double _rpeValue = 5.0;
 
   @override
   void initState() {
@@ -421,7 +421,6 @@ class _ExerciseMarkingDialogState extends State<_ExerciseMarkingDialog> {
 
   @override
   void dispose() {
-    _rpeController.dispose();
     super.dispose();
   }
 
@@ -628,28 +627,41 @@ class _ExerciseMarkingDialogState extends State<_ExerciseMarkingDialog> {
               const SizedBox(height: 24),
 
               // RPE Input
-              TextField(
-                controller: _rpeController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'RPE (1-10)',
-                  labelStyle: TextStyle(color: Colors.grey.shade600),
-                  helperText: '1=Easy, 10=Max effort',
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'RPE (Rate of Perceived Exertion)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  const SizedBox(height: 8),
+                  Slider(
+                    value: _rpeValue,
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    label: _rpeValue.round().toString(),
+                    activeColor: primaryBlue,
+                    inactiveColor: Colors.grey.shade300,
+                    onChanged: (value) {
+                      setState(() {
+                        _rpeValue = value;
+                      });
+                    },
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: primaryBlue, width: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('1 (Easy)', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      Text('${_rpeValue.round()}', style: TextStyle(color: primaryBlue, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text('10 (Max Effort)', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                    ],
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 24),
 
@@ -659,12 +671,12 @@ class _ExerciseMarkingDialogState extends State<_ExerciseMarkingDialog> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      final rpe = int.tryParse(_rpeController.text) ?? 5;
+                      final rpe = _rpeValue.round();
                       widget.provider.completeExerciseWithLog(
                         exerciseId: ex.exerciseId,
                         dayIndex: widget.dayIndex,
                         repsDone: ex.targetReps * ex.targetSets,
-                        rpe: rpe.clamp(1, 10),
+                        rpe: rpe,
                       );
 
                       Navigator.of(context).pop();
