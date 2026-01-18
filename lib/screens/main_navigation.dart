@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'exercise_screen.dart';
 import 'food_screen.dart';
-import 'schedule_screen.dart';
+import 'profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -17,7 +17,7 @@ class MainNavigationState extends State<MainNavigation> {
     HomeScreen(),
     ExerciseScreen(),
     FoodScreen(),
-    ScheduleScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -40,8 +40,8 @@ class MainNavigationState extends State<MainNavigation> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Food'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
