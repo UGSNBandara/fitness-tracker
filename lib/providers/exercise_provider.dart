@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/exercise_log.dart';
 import '../models/user_level.dart';
 import '../services/firebase_exercise_service.dart';
+import '../services/local_storage_service.dart';
 
 class ExerciseProvider extends ChangeNotifier {
   // Predefined exercises with YouTube demo links
@@ -317,12 +318,21 @@ class ExerciseProvider extends ChangeNotifier {
     );
     _logs.add(log);
 
+    // Save to local storage
+    _saveWorkoutLocally();
+
     // Save to Firebase
     _saveWorkoutToFirebase(log);
 
     // Check if week is complete
     _checkWeekCompletion();
     notifyListeners();
+  }
+
+  /// Save workout logs to local storage
+  Future<void> _saveWorkoutLocally() async {
+    await LocalStorageService.instance.saveWorkoutLogs(_logs);
+    await LocalStorageService.instance.saveCompletionStatus(_completionStatus);
   }
 
   /// Save workout log to Firebase
@@ -384,5 +394,59 @@ class ExerciseProvider extends ChangeNotifier {
   /// Call this after adding all Firebase logs to notify listeners once
   void notifyFirebaseLogsLoaded() {
     notifyListeners();
+  }
+
+  /// Load workout logs from local storage
+  Future<void> loadLogsFromLocalStorage() async {
+    try {
+      final logsData = await LocalStorageService.instance.loadWorkoutLogs();
+      final statusData = await LocalStorageService.instance
+          .loadCompletionStatus();
+
+      for (final logData in logsData) {
+        try {
+          // Find the exercise by exerciseId
+          final exerciseId = logData['exerciseId'] as String?;
+          final exerciseName = logData['exerciseName'] as String?;
+
+          Exercise? exercise;
+          if (exerciseId != null) {
+            exercise = _exercises.firstWhere(
+              (ex) => ex.exerciseId == exerciseId,
+              orElse: () => Exercise(
+                exerciseId: exerciseId,
+                name: exerciseName ?? 'Unknown',
+                muscleGroup: 'Unknown',
+                steps: [],
+                targetReps: 0,
+                targetSets: 0,
+                caloriesPerSet: 0,
+              ),
+            );
+          }
+
+          if (exercise != null) {
+            final log = ExerciseLog.fromFirestore(logData, exercise);
+            if (!_logs.any(
+              (existingLog) =>
+                  existingLog.exercise.exerciseId == log.exercise.exerciseId &&
+                  existingLog.start.day == log.start.day,
+            )) {
+              _logs.add(log);
+            }
+          }
+        } catch (e) {
+          debugPrint('Error loading log from local storage: $e');
+        }
+      }
+
+      // Restore completion status
+      _completionStatus.addAll(statusData);
+
+      notifyListeners();
+      debugPrint('✅ Loaded ${_logs.length} logs from local storage');
+    } catch (e) {
+      debugPrint('Error loading from local storage: $e');
+    }
   }
 }

@@ -24,6 +24,16 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   void initState() {
     super.initState();
+    _loadWorkoutData();
+  }
+
+  Future<void> _loadWorkoutData() async {
+    final provider = context.read<ExerciseProvider>();
+
+    // Load from local storage first (faster, works offline)
+    await provider.loadLogsFromLocalStorage();
+
+    // Then try to sync with Firebase in background
     _loadWorkoutLogsFromFirebase();
   }
 
