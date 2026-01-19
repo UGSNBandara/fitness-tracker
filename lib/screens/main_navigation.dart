@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import 'exercise_screen.dart';
 import 'food_screen.dart';
 import 'profile_screen.dart';
+import '../services/user_service.dart';
+import '../providers/exercise_provider.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -19,6 +22,25 @@ class MainNavigationState extends State<MainNavigation> {
     FoodScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load user profile and set their fitness level in ExerciseProvider
+    _initializeUserLevel();
+  }
+
+  Future<void> _initializeUserLevel() async {
+    try {
+      final user = await UserService.instance.getCurrentUserProfile();
+      if (user != null && mounted) {
+        // Set user's fitness level in exercise provider
+        context.read<ExerciseProvider>().setUserLevel(user.level);
+      }
+    } catch (e) {
+      // Handle error silently
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +61,7 @@ class MainNavigationState extends State<MainNavigation> {
             label: 'Exercise',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Food'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
