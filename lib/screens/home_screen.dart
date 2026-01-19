@@ -225,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'Workouts',
                       subtitle: 'Start training',
                       icon: Icons.fitness_center,
-                      color: const Color(0xFF48A9FE),
+                      color: primaryBlue,
                       onTap: () =>
                           _navigateToTab(context, 1), // Index 1 = Exercise
                     ),
@@ -237,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'Nutrition',
                       subtitle: 'Log meals',
                       icon: Icons.restaurant,
-                      color: const Color(0xFFFA6400),
+                      color: primaryBlue,
                       onTap: () => _navigateToTab(context, 2), // Index 2 = Food
                     ),
                   ),
@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Your Progress',
                 subtitle: 'Check your stats',
                 icon: Icons.bar_chart,
-                color: const Color(0xFF6B48FF),
+                color: primaryBlue,
                 onTap: () => _navigateToTab(context, 3), // Index 3 = Profile
               ),
             ],
