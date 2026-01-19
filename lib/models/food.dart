@@ -16,4 +16,24 @@ class FoodEntry {
 		required this.fat,
 		DateTime? time,
 	}) : time = time ?? DateTime.now();
+
+	FoodEntry copyWith({
+		String? name,
+		String? quantity,
+		int? calories,
+		int? protein,
+		int? carbs,
+		int? fat,
+		DateTime? time,
+	}) {
+		return FoodEntry(
+			name: name ?? this.name,
+			quantity: quantity ?? this.quantity,
+			calories: calories ?? this.calories,
+			protein: protein ?? this.protein,
+			carbs: carbs ?? this.carbs,
+			fat: fat ?? this.fat,
+			time: time ?? this.time,
+		);
+	}
 }
