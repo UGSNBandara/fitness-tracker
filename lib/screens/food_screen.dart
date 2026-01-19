@@ -22,12 +22,11 @@ class _FoodScreenState extends State<FoodScreen> {
   bool _isLoading = true;
   final int _dailyGoal = 2000;
 
-  // Premium green color theme
-  static const Color _primaryGreen = Color(0xFF10B981); // emerald-500
-  static const Color _darkGreen = Color(0xFF059669); // emerald-600
-  static const Color _lightGreen = Color(0xFF34D399); // emerald-400
-  static const Color _bgGreen = Color(0xFFECFDF5); // emerald-50
-  static const Color _textGreen = Color(0xFF047857); // emerald-700
+  // Energetic Blue Theme Colors (matching exercise_screen.dart)
+  static const Color _primaryBlue = Color(0xFF0066FF); // Vibrant blue
+  static const Color _lightBlue = Color(0xFFE0F0FF); // Light blue background
+  static const Color _darkBlue = Color(0xFF0052CC); // Dark blue
+  static const Color _accentBlue = Color(0xFF00B4FF); // Cyan accent
 
   @override
   void initState() {
@@ -125,7 +124,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Food Name',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -136,7 +135,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -147,7 +146,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Quantity',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -158,7 +157,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -170,7 +169,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Calories',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -181,7 +180,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -196,7 +195,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Protein (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -207,7 +206,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -221,7 +220,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Carbs (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -232,7 +231,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -246,7 +245,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Fat (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -257,7 +256,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -279,7 +278,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Meal',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -290,7 +289,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -339,7 +338,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primaryGreen,
+                          backgroundColor: _primaryBlue,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -371,7 +370,7 @@ class _FoodScreenState extends State<FoodScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: _bgGreen,
+        backgroundColor: _lightBlue,
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
@@ -393,7 +392,7 @@ class _FoodScreenState extends State<FoodScreen> {
     final remaining = (_dailyGoal - _totalCalories).clamp(0, _dailyGoal);
 
     return Scaffold(
-      backgroundColor: _bgGreen,
+      backgroundColor: _lightBlue,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -409,12 +408,12 @@ class _FoodScreenState extends State<FoodScreen> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.search, color: _darkGreen),
+            icon: Icon(Icons.search, color: _primaryBlue),
             tooltip: 'Search',
           ),
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.person_outline, color: _darkGreen),
+            icon: Icon(Icons.person_outline, color: _primaryBlue),
             tooltip: 'Profile',
           ),
           const SizedBox(width: 8),
@@ -457,7 +456,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _bgGreen,
+                          color: _lightBlue,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -465,7 +464,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: _textGreen,
+                            color: _darkBlue,
                           ),
                         ),
                       ),
@@ -519,16 +518,16 @@ class _FoodScreenState extends State<FoodScreen> {
                       value: progress,
                       minHeight: 8,
                       backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(_primaryGreen),
+                      valueColor: AlwaysStoppedAnimation<Color>(_primaryBlue),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _MacroStat(label: 'Protein', value: _totalProtein, color: _primaryGreen),
-                      _MacroStat(label: 'Carbs', value: _totalCarbs, color: _lightGreen),
-                      _MacroStat(label: 'Fat', value: _totalFat, color: _darkGreen),
+                      _MacroStat(label: 'Protein', value: _totalProtein, color: _primaryBlue),
+                      _MacroStat(label: 'Carbs', value: _totalCarbs, color: _accentBlue),
+                      _MacroStat(label: 'Fat', value: _totalFat, color: _darkBlue),
                     ],
                   ),
                 ],
@@ -550,7 +549,7 @@ class _FoodScreenState extends State<FoodScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddFoodDialog,
-        backgroundColor: _primaryGreen,
+        backgroundColor: _primaryBlue,
         foregroundColor: Colors.white,
         elevation: 4,
         icon: const Icon(Icons.add),
@@ -609,7 +608,7 @@ class _FoodScreenState extends State<FoodScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _bgGreen,
+                    color: _lightBlue,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -617,7 +616,7 @@ class _FoodScreenState extends State<FoodScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: _textGreen,
+                      color: _darkBlue,
                     ),
                   ),
                 ),
@@ -705,7 +704,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Food Name',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -716,7 +715,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -727,7 +726,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Quantity',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -738,7 +737,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -750,7 +749,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       labelText: 'Calories',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: _bgGreen,
+                      fillColor: _lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -761,7 +760,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                        borderSide: BorderSide(color: _primaryBlue, width: 2),
                       ),
                     ),
                 ),
@@ -776,7 +775,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Protein (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -787,7 +786,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -801,7 +800,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Carbs (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -812,7 +811,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -826,7 +825,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Fat (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: _bgGreen,
+                          fillColor: _lightBlue,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -837,7 +836,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: _primaryGreen, width: 2),
+                            borderSide: BorderSide(color: _primaryBlue, width: 2),
                           ),
                         ),
                       ),
@@ -892,7 +891,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primaryGreen,
+                          backgroundColor: _primaryBlue,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
