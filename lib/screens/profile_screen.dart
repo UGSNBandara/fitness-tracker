@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
 import '../services/nutrition_service.dart';
+import '../services/profile_picture_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,11 +27,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _nutritionSummary;
   bool _nutritionLoading = false;
 
+  // Profile picture
+  String? _profilePictureUrl;
+  bool _profilePictureLoading = false;
+  final ImagePicker _imagePicker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
     _loadNutritionSummary();
+    _loadProfilePicture();
   }
 
   Future<void> _loadUserProfile() async {
@@ -52,6 +61,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Handle error
     } finally {
       setState(() => _nutritionLoading = false);
+    }
+  }
+
+  Future<void> _loadProfilePicture() async {
+    try {
+      final url = await ProfilePictureService.instance.getProfilePictureUrl();
+      setState(() => _profilePictureUrl = url);
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<void> _pickAndUploadProfilePicture() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 800,
+      );
+
+      if (image == null) return;
+
+      setState(() => _profilePictureLoading = true);
+
+      final file = File(image.path);
+      final url = await ProfilePictureService.instance.uploadProfilePicture(file);
+      
+      setState(() {
+        _profilePictureUrl = url;
+        _profilePictureLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile picture updated successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _profilePictureLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload profile picture: ${e.toString()}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -456,38 +515,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Profile Picture
                   Stack(
                     children: [
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                            width: 3,
+                      GestureDetector(
+                        onTap: _profilePictureLoading ? null : _pickAndUploadProfilePicture,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey[300]!,
+                              width: 3,
+                            ),
                           ),
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.grey[600],
+                          child: ClipOval(
+                            child: _profilePictureLoading
+                                ? const Center(child: CircularProgressIndicator())
+                                : _profilePictureUrl != null
+                                    ? Image.network(
+                                        _profilePictureUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset(
+                                            'assets/images/profile_pic/chad.jpg',
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )
+                                    : Image.asset(
+                                        'assets/images/profile_pic/chad.jpg',
+                                        fit: BoxFit.cover,
+                                      ),
+                          ),
                         ),
                       ),
                       Positioned(
                         bottom: 0,
                         right: 0,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[900],
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 16,
-                            color: Colors.white,
+                        child: GestureDetector(
+                          onTap: _profilePictureLoading ? null : _pickAndUploadProfilePicture,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[900],
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 18,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -1029,6 +1108,103 @@ class _ActivityCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+class _NutritionMacroCard extends StatelessWidget {
+  final String label;
+  final int value;
+  final String unit;
+  final IconData icon;
+
+  const _NutritionMacroCard({
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 24, color: Colors.grey[700]),
+          const SizedBox(height: 8),
+          Text(
+            '$value',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            unit,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TotalStat extends StatelessWidget {
+  final String label;
+  final int value;
+  final IconData icon;
+
+  const _TotalStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 24, color: Colors.grey[700]),
+        const SizedBox(height: 8),
+        Text(
+          '$value',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
