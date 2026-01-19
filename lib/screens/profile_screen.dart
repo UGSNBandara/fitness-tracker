@@ -404,17 +404,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Stack(
                     children: [
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 200,
+                        height: 200,
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!, width: 3),
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.grey[600],
+                          border: Border.all(color: Colors.grey[300]!, width: 0),
+                          image: const DecorationImage(
+                            image: AssetImage('assets/images/profile_pic/chad.jpg'),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       Positioned(
