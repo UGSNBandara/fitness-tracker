@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
+import '../services/nutrition_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,10 +20,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _activeDays = 6;
   int _streak = 12;
 
+  // Nutrition summary data
+  Map<String, dynamic>? _nutritionSummary;
+  bool _nutritionLoading = false;
+
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _loadNutritionSummary();
   }
 
   Future<void> _loadUserProfile() async {
@@ -34,6 +40,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Handle error
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadNutritionSummary() async {
+    setState(() => _nutritionLoading = true);
+    try {
+      final summary = await NutritionService.instance.getNutritionSummary();
+      setState(() => _nutritionSummary = summary);
+    } catch (e) {
+      // Handle error
+    } finally {
+      setState(() => _nutritionLoading = false);
     }
   }
 
@@ -439,8 +457,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Stack(
                     children: [
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 200,
+                        height: 200,
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           shape: BoxShape.circle,
@@ -702,6 +720,190 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
+                ],
+              ),
+            ),
+
+            // Nutrition Summary Section
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nutrition Summary',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (_nutritionLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else if (_nutritionSummary != null) ...[
+                    // Average Daily Calories
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Avg Daily Calories',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[600],
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${_nutritionSummary!['avgCalories']}',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                  height: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'kcal/day',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[900],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${_nutritionSummary!['daysWithData']} days',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Macro Breakdown
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _NutritionMacroCard(
+                            label: 'Protein',
+                            value: _nutritionSummary!['avgProtein'],
+                            unit: 'g',
+                            icon: Icons.fitness_center_outlined,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _NutritionMacroCard(
+                            label: 'Carbs',
+                            value: _nutritionSummary!['avgCarbs'],
+                            unit: 'g',
+                            icon: Icons.energy_savings_leaf_outlined,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _NutritionMacroCard(
+                            label: 'Fat',
+                            value: _nutritionSummary!['avgFat'],
+                            unit: 'g',
+                            icon: Icons.water_drop_outlined,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Total Summary
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _TotalStat(
+                            label: 'Total Calories',
+                            value: _nutritionSummary!['totalCalories'],
+                            icon: Icons.local_fire_department_outlined,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: Colors.grey[300],
+                          ),
+                          _TotalStat(
+                            label: 'Days Tracked',
+                            value: _nutritionSummary!['daysWithData'],
+                            icon: Icons.calendar_today_outlined,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.restaurant_outlined, size: 48, color: Colors.grey[400]),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No nutrition data available',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

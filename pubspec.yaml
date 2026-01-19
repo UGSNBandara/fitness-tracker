@@ -74,6 +74,7 @@ flutter:
   assets:
     - assets/images/exercises/
     - assets/images/motivation/
+    - assets/images/profile_pic/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

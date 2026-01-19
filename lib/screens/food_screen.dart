@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/food.dart';
 import '../widgets/food_card.dart';
 import '../widgets/nutrition_pie.dart';
+import '../services/nutrition_service.dart';
 
 class FoodScreen extends StatefulWidget {
   const FoodScreen({super.key});
@@ -12,19 +13,50 @@ class FoodScreen extends StatefulWidget {
 
 class _FoodScreenState extends State<FoodScreen> {
   final Map<String, List<FoodEntry>> _meals = {
-    'Breakfast': [
-      FoodEntry(name: 'Oatmeal', quantity: '1 bowl', calories: 250, protein: 8, carbs: 45, fat: 5),
-    ],
-    'Lunch': [
-      FoodEntry(name: 'Grilled Chicken', quantity: '200g', calories: 450, protein: 40, carbs: 30, fat: 12),
-    ],
+    'Breakfast': [],
+    'Lunch': [],
     'Dinner': [],
-    'Snacks': [
-      FoodEntry(name: 'Banana', quantity: '1', calories: 100, protein: 1, carbs: 27, fat: 0),
-    ],
+    'Snacks': [],
   };
 
+  bool _isLoading = true;
   final int _dailyGoal = 2000;
+
+  // Premium green color theme
+  static const Color _primaryGreen = Color(0xFF10B981); // emerald-500
+  static const Color _darkGreen = Color(0xFF059669); // emerald-600
+  static const Color _lightGreen = Color(0xFF34D399); // emerald-400
+  static const Color _bgGreen = Color(0xFFECFDF5); // emerald-50
+  static const Color _textGreen = Color(0xFF047857); // emerald-700
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNutritionData();
+  }
+
+  Future<void> _loadNutritionData() async {
+    setState(() => _isLoading = true);
+    try {
+      final meals = await NutritionService.instance.loadDailyNutrition(DateTime.now());
+      setState(() {
+        _meals.clear();
+        _meals.addAll(meals);
+      });
+    } catch (e) {
+      // Handle error silently or show snackbar
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveNutritionData() async {
+    try {
+      await NutritionService.instance.saveDailyNutrition(DateTime.now(), _meals);
+    } catch (e) {
+      // Handle error
+    }
+  }
 
   int get _totalCalories => _meals.values.expand((e) => e).fold(0, (s, e) => s + e.calories);
   int get _totalProtein => _meals.values.expand((e) => e).fold(0, (s, e) => s + e.protein);
@@ -35,12 +67,14 @@ class _FoodScreenState extends State<FoodScreen> {
     setState(() {
       _meals[meal]!.insert(0, entry);
     });
+    _saveNutritionData();
   }
 
   void _removeEntry(String meal, int index) {
     setState(() {
       _meals[meal]!.removeAt(index);
     });
+    _saveNutritionData();
   }
 
   Future<void> _showAddFoodDialog() async {
@@ -54,8 +88,9 @@ class _FoodScreenState extends State<FoodScreen> {
 
     await showDialog<void>(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      builder: (context) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
@@ -86,69 +121,69 @@ class _FoodScreenState extends State<FoodScreen> {
                 const SizedBox(height: 24),
                 TextField(
                   controller: _name,
-                  decoration: InputDecoration(
-                    labelText: 'Food Name',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Food Name',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _qty,
-                  decoration: InputDecoration(
-                    labelText: 'Quantity',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Quantity',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _cal,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Calories',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Calories',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -161,7 +196,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Protein (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -172,7 +207,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -186,7 +221,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Carbs (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -197,7 +232,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -211,7 +246,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Fat (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -222,7 +257,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -233,25 +268,31 @@ class _FoodScreenState extends State<FoodScreen> {
                 DropdownButtonFormField<String>(
                   value: selectedMeal,
                   items: _meals.keys.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
-                  onChanged: (v) => selectedMeal = v ?? selectedMeal,
-                  decoration: InputDecoration(
-                    labelText: 'Meal',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                  onChanged: (v) {
+                    if (v != null) {
+                      setDialogState(() {
+                        selectedMeal = v;
+                      });
+                    }
+                  },
+                    decoration: InputDecoration(
+                      labelText: 'Meal',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -298,7 +339,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900],
+                          backgroundColor: _primaryGreen,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -321,17 +362,38 @@ class _FoodScreenState extends State<FoodScreen> {
             ),
           ),
         ),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: _bgGreen,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Food',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final progress = (_totalCalories / _dailyGoal).clamp(0, 1).toDouble();
     final remaining = (_dailyGoal - _totalCalories).clamp(0, _dailyGoal);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: _bgGreen,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -347,12 +409,12 @@ class _FoodScreenState extends State<FoodScreen> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.search, color: Colors.grey[800]),
+            icon: Icon(Icons.search, color: _darkGreen),
             tooltip: 'Search',
           ),
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.person_outline, color: Colors.grey[800]),
+            icon: Icon(Icons.person_outline, color: _darkGreen),
             tooltip: 'Profile',
           ),
           const SizedBox(width: 8),
@@ -395,7 +457,7 @@ class _FoodScreenState extends State<FoodScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: _bgGreen,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -403,7 +465,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey[800],
+                            color: _textGreen,
                           ),
                         ),
                       ),
@@ -457,16 +519,16 @@ class _FoodScreenState extends State<FoodScreen> {
                       value: progress,
                       minHeight: 8,
                       backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[900]!),
+                      valueColor: AlwaysStoppedAnimation<Color>(_primaryGreen),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _MacroStat(label: 'Protein', value: _totalProtein, color: Colors.grey[900]!),
-                      _MacroStat(label: 'Carbs', value: _totalCarbs, color: Colors.grey[600]!),
-                      _MacroStat(label: 'Fat', value: _totalFat, color: Colors.grey[400]!),
+                      _MacroStat(label: 'Protein', value: _totalProtein, color: _primaryGreen),
+                      _MacroStat(label: 'Carbs', value: _totalCarbs, color: _lightGreen),
+                      _MacroStat(label: 'Fat', value: _totalFat, color: _darkGreen),
                     ],
                   ),
                 ],
@@ -488,7 +550,7 @@ class _FoodScreenState extends State<FoodScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddFoodDialog,
-        backgroundColor: Colors.grey[900],
+        backgroundColor: _primaryGreen,
         foregroundColor: Colors.white,
         elevation: 4,
         icon: const Icon(Icons.add),
@@ -547,7 +609,7 @@ class _FoodScreenState extends State<FoodScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: _bgGreen,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -555,7 +617,7 @@ class _FoodScreenState extends State<FoodScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                      color: _textGreen,
                     ),
                   ),
                 ),
@@ -639,69 +701,69 @@ class _FoodScreenState extends State<FoodScreen> {
                 const SizedBox(height: 24),
                 TextField(
                   controller: _name,
-                  decoration: InputDecoration(
-                    labelText: 'Food Name',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Food Name',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _qty,
-                  decoration: InputDecoration(
-                    labelText: 'Quantity',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Quantity',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _cal,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Calories',
-                    labelStyle: TextStyle(color: Colors.grey[600]),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    decoration: InputDecoration(
+                      labelText: 'Calories',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: _bgGreen,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: _primaryGreen, width: 2),
+                      ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -714,7 +776,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Protein (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -725,7 +787,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -739,7 +801,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Carbs (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -750,7 +812,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -764,7 +826,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           labelText: 'Fat (g)',
                           labelStyle: TextStyle(color: Colors.grey[600]),
                           filled: true,
-                          fillColor: Colors.grey[50],
+                          fillColor: _bgGreen,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -775,7 +837,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[900]!, width: 2),
+                            borderSide: BorderSide(color: _primaryGreen, width: 2),
                           ),
                         ),
                       ),
@@ -826,10 +888,11 @@ class _FoodScreenState extends State<FoodScreen> {
                               time: entry.time,
                             );
                           });
+                          _saveNutritionData();
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900],
+                          backgroundColor: _primaryGreen,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
