@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/exercise_log.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../providers/exercise_provider.dart';
 
 const Color primaryBlue = Color(0xFF0066FF);
 const Color lightBlue = Color(0xFFE0F0FF);
@@ -29,6 +30,11 @@ class _ExerciseCardState extends State<ExerciseCard> {
   Widget build(BuildContext context) {
     final ex = widget.exercise;
     final isCompleted = widget.isCompleted;
+
+    // Get the current user's fitness level from provider
+    final userLevel = context.watch<ExerciseProvider>().userLevel;
+    final levelName = _getLevelName(userLevel);
+    final setsForLevel = ex.getSetsForLevel(levelName.toLowerCase());
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -122,7 +128,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                           const SizedBox(width: 8),
                           _InfoChip(
                             label: 'Sets',
-                            value: '${ex.targetSets}',
+                            value: '$setsForLevel',
                             icon: Icons.layers,
                           ),
                         ],
@@ -183,8 +189,12 @@ class _ExerciseCardState extends State<ExerciseCard> {
     );
   }
 
-  String _formatTime(DateTime dt) {
-    return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+  String _getLevelName(dynamic level) {
+    final levelStr = level.toString();
+    if (levelStr.contains('beginner')) return 'Beginner';
+    if (levelStr.contains('intermediate')) return 'Intermediate';
+    if (levelStr.contains('advanced')) return 'Advanced';
+    return 'beginner';
   }
 }
 
@@ -192,13 +202,11 @@ class _InfoChip extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color? color;
 
   const _InfoChip({
     required this.label,
     required this.value,
     required this.icon,
-    this.color,
   });
 
   @override
@@ -206,7 +214,7 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color ?? lightBlue,
+        color: lightBlue,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: primaryBlue.withOpacity(0.3), width: 0.5),
       ),
