@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/exercise_log.dart';
+import '../models/user_level.dart';
+import '../services/firebase_exercise_service.dart';
 
 class ExerciseProvider extends ChangeNotifier {
   // Predefined exercises with YouTube demo links
@@ -12,6 +14,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=IODxDxX7oi4'],
       targetReps: 8,
       targetSets: 3,
+      caloriesPerSet: 8,
     ),
     Exercise(
       exerciseId: '2',
@@ -20,6 +23,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=xQvguRHXlKQ'],
       targetReps: 12,
       targetSets: 3,
+      caloriesPerSet: 10,
     ),
     Exercise(
       exerciseId: '3',
@@ -28,6 +32,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=p4VhdAMqnfE'],
       targetReps: 20,
       targetSets: 3,
+      caloriesPerSet: 6,
     ),
     Exercise(
       exerciseId: '4',
@@ -36,6 +41,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=c6bSwJe4pIE'],
       targetReps: 15,
       targetSets: 3,
+      caloriesPerSet: 12,
     ),
     // WEEK 2 - Intermediate
     Exercise(
@@ -45,6 +51,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=S-VsxQLhH4g'],
       targetReps: 10,
       targetSets: 3,
+      caloriesPerSet: 10,
     ),
     Exercise(
       exerciseId: '6',
@@ -53,6 +60,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=wvrnowAf_oA'],
       targetReps: 10,
       targetSets: 3,
+      caloriesPerSet: 12,
     ),
     Exercise(
       exerciseId: '7',
@@ -61,6 +69,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=Hrmob1V_tWI'],
       targetReps: 15,
       targetSets: 3,
+      caloriesPerSet: 8,
     ),
     Exercise(
       exerciseId: '8',
@@ -69,6 +78,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=nmwgirgXLYM'],
       targetReps: 20,
       targetSets: 3,
+      caloriesPerSet: 14,
     ),
     // WEEK 3 - Advanced
     Exercise(
@@ -78,6 +88,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=hGnAPONkFJs'],
       targetReps: 12,
       targetSets: 3,
+      caloriesPerSet: 11,
     ),
     Exercise(
       exerciseId: '10',
@@ -86,6 +97,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=2xLhVJwePEg'],
       targetReps: 8,
       targetSets: 3,
+      caloriesPerSet: 14,
     ),
     Exercise(
       exerciseId: '11',
@@ -94,6 +106,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=m6O0YFfhvEw'],
       targetReps: 20,
       targetSets: 3,
+      caloriesPerSet: 9,
     ),
     Exercise(
       exerciseId: '12',
@@ -102,6 +115,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=JZQA84N6MSU'],
       targetReps: 10,
       targetSets: 3,
+      caloriesPerSet: 16,
     ),
     // WEEK 4 - Expert
     Exercise(
@@ -111,6 +125,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=Fk08jzC9bnU'],
       targetReps: 8,
       targetSets: 4,
+      caloriesPerSet: 13,
     ),
     Exercise(
       exerciseId: '14',
@@ -119,6 +134,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=0X-0Vj_ZqSY'],
       targetReps: 12,
       targetSets: 4,
+      caloriesPerSet: 15,
     ),
     Exercise(
       exerciseId: '15',
@@ -127,6 +143,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=tTfx0bZBjsA'],
       targetReps: 15,
       targetSets: 3,
+      caloriesPerSet: 12,
     ),
     Exercise(
       exerciseId: '16',
@@ -135,6 +152,7 @@ class ExerciseProvider extends ChangeNotifier {
       steps: ['https://www.youtube.com/watch?v=2j55dDfXB0g'],
       targetReps: 10,
       targetSets: 3,
+      caloriesPerSet: 14,
     ),
   ];
 
@@ -152,9 +170,12 @@ class ExerciseProvider extends ChangeNotifier {
   ];
 
   int _currentWeek = 0;
+  UserLevel _userLevel = UserLevel.beginner;
+  int _weekCount = 0; // Track weeks at current level
   Map<String, bool> _completionStatus =
       {}; // "${week}_${dayIndex}_${exerciseId}" -> completed
   List<ExerciseLog> _logs = [];
+  static const double COMPLETION_THRESHOLD = 0.90; // 90% completion required
 
   ExerciseProvider() {
     _initializePlans();
@@ -176,6 +197,14 @@ class ExerciseProvider extends ChangeNotifier {
   List<Exercise> get exercises => _exercises;
   List<List<List<int>>> get weekPlans => _weekPlans;
   int get currentWeek => _currentWeek;
+  UserLevel get userLevel => _userLevel;
+  int get weekCount => _weekCount;
+
+  /// Set user level from profile
+  void setUserLevel(UserLevel level) {
+    _userLevel = level;
+    notifyListeners();
+  }
 
   // Get exercises for current week (same 4 for all days)
   List<Exercise> get currentWeekExercises =>
@@ -183,8 +212,18 @@ class ExerciseProvider extends ChangeNotifier {
 
   List<ExerciseLog> get logs => _logs;
 
-  // Calculate progress for current week
+  // Check if current week is fully completed (all 4 exercises for all 7 days)
+  void _checkWeekCompletion() {
+    // This can be used to trigger notifications or UI updates when threshold is met
+  }
+
+  /// Calculate progress for current week (using 90% threshold)
   double get weekProgress {
+    return getWeekCompletionPercentage();
+  }
+
+  /// Check completion percentage for current week
+  double getWeekCompletionPercentage() {
     final total = currentWeekExercises.length * 7; // 4 exercises * 7 days
     if (total == 0) return 0;
 
@@ -198,6 +237,45 @@ class ExerciseProvider extends ChangeNotifier {
       }
     }
     return completed / total;
+  }
+
+  /// Check if current week meets 90% completion threshold
+  bool isWeekThresholdMet() {
+    return getWeekCompletionPercentage() >= COMPLETION_THRESHOLD;
+  }
+
+  /// Check if user can advance to next level
+  bool canAdvanceLevel() {
+    // Advanced level is the max, no progression beyond that
+    if (_userLevel == UserLevel.advanced) return false;
+    return isWeekThresholdMet();
+  }
+
+  /// Advance user to next fitness level
+  void advanceLevel() {
+    if (_userLevel == UserLevel.beginner) {
+      _userLevel = UserLevel.intermediate;
+    } else if (_userLevel == UserLevel.intermediate) {
+      _userLevel = UserLevel.advanced;
+    }
+    // Reset week counter and clear completion for new level
+    _weekCount++;
+    _clearWeekCompletion();
+    notifyListeners();
+  }
+
+  /// Clear completion status for current week
+  void _clearWeekCompletion() {
+    final keysToRemove = <String>[];
+    for (int day = 0; day < 7; day++) {
+      for (int exIdx in _weekPlans[_currentWeek][day]) {
+        final key = "${_currentWeek}_${day}_${_exercises[exIdx].exerciseId}";
+        keysToRemove.add(key);
+      }
+    }
+    for (var key in keysToRemove) {
+      _completionStatus[key] = false;
+    }
   }
 
   // Add exercise (manual entry)
@@ -219,37 +297,42 @@ class ExerciseProvider extends ChangeNotifier {
     required int dayIndex,
     required int repsDone,
     required int rpe,
+    required int setsDone,
   }) {
     final key = "${_currentWeek}_${dayIndex}_${exerciseId}";
     _completionStatus[key] = true;
 
     final ex = _exercises.firstWhere((e) => e.exerciseId == exerciseId);
+
+    // Calculate calories based on sets completed
+    final caloriesBurned = ex.calculateTotalCalories(setsDone);
+
     final log = ExerciseLog(
       start: DateTime.now().subtract(const Duration(minutes: 5)),
       end: DateTime.now(),
       repsDone: repsDone,
       rpe: rpe,
       exercise: ex,
+      caloriesBurned: caloriesBurned,
     );
     _logs.add(log);
+
+    // Save to Firebase
+    _saveWorkoutToFirebase(log);
 
     // Check if week is complete
     _checkWeekCompletion();
     notifyListeners();
   }
 
-  // Check if current week is fully completed (all 4 exercises for all 7 days)
-  void _checkWeekCompletion() {
-    final total = currentWeekExercises.length * 7; // 4 exercises * 7 days
-
-    int completed = 0;
-    for (int day = 0; day < 7; day++) {
-      for (int exIdx in _weekPlans[_currentWeek][day]) {
-        final key = "${_currentWeek}_${day}_${_exercises[exIdx].exerciseId}";
-        if (_completionStatus[key] == true) {
-          completed++;
-        }
-      }
+  /// Save workout log to Firebase
+  Future<void> _saveWorkoutToFirebase(ExerciseLog log) async {
+    try {
+      print('🏋️ Saving workout to Firebase: ${log.exercise.name}');
+      await FirebaseExerciseService.instance.saveWorkoutLog(log);
+      print('✅ Workout saved successfully! Calories: ${log.caloriesBurned}');
+    } catch (e) {
+      print('❌ Error saving to Firebase: $e');
     }
   }
 
@@ -279,6 +362,27 @@ class ExerciseProvider extends ChangeNotifier {
     _currentWeek = 0;
     _logs.clear();
     _initializePlans();
+    notifyListeners();
+  }
+
+  /// Add a log from Firebase (used on app startup to load previous workouts)
+  void addLogFromFirebase(ExerciseLog log) {
+    if (!_logs.any(
+      (existingLog) =>
+          existingLog.exercise.exerciseId == log.exercise.exerciseId &&
+          existingLog.start.day == log.start.day,
+    )) {
+      _logs.add(log);
+
+      // Mark exercise as completed in the completion status
+      final dayIndex = log.start.weekday - 1; // Convert to 0-6 format
+      final key = "${_currentWeek}_${dayIndex}_${log.exercise.exerciseId}";
+      _completionStatus[key] = true;
+    }
+  }
+
+  /// Call this after adding all Firebase logs to notify listeners once
+  void notifyFirebaseLogsLoaded() {
     notifyListeners();
   }
 }
