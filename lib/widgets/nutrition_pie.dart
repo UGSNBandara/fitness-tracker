@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+// Blue Theme Colors
+const Color primaryBlue = Color(0xFF0066FF);
+const Color darkBlue = Color(0xFF0052CC);
+const Color lightBlue = Color(0xFF4D94FF);
+
 class NutritionPie extends StatelessWidget {
   final int protein;
   final int carbs;
   final int fat;
   final double size;
 
-  const NutritionPie({super.key, required this.protein, required this.carbs, required this.fat, this.size = 120});
+  const NutritionPie({
+    super.key,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    this.size = 120,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +68,11 @@ class NutritionPie extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _Legend(color: Colors.grey[900]!, label: 'P', value: protein),
+            _Legend(color: darkBlue, label: 'P', value: protein),
             const SizedBox(width: 12),
-            _Legend(color: Colors.grey[600]!, label: 'C', value: carbs),
+            _Legend(color: primaryBlue, label: 'C', value: carbs),
             const SizedBox(width: 12),
-            _Legend(color: Colors.grey[400]!, label: 'F', value: fat),
+            _Legend(color: lightBlue, label: 'F', value: fat),
           ],
         ),
       ],
@@ -73,7 +84,11 @@ class _Legend extends StatelessWidget {
   final Color color;
   final String label;
   final int value;
-  const _Legend({required this.color, required this.label, required this.value});
+  const _Legend({
+    required this.color,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +101,7 @@ class _Legend extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.grey[300]!, width: 0.5),
+            border: Border.all(color: primaryBlue.withOpacity(0.3), width: 0.5),
           ),
         ),
         const SizedBox(height: 4),
@@ -123,32 +138,32 @@ class _PiePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
-    
+
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
-    
+
     double start = -pi / 2;
 
-    // Draw protein (darkest)
+    // Draw protein (darkest blue)
     if (p > 0) {
-      paint.color = Colors.grey[900]!;
+      paint.color = darkBlue;
       final sweep = p * 2 * pi;
       canvas.drawArc(rect, start, sweep, true, paint);
       start += sweep;
     }
-    
-    // Draw carbs (medium)
+
+    // Draw carbs (primary blue)
     if (c > 0) {
-      paint.color = Colors.grey[600]!;
+      paint.color = primaryBlue;
       final sweep = c * 2 * pi;
       canvas.drawArc(rect, start, sweep, true, paint);
       start += sweep;
     }
-    
-    // Draw fat (lightest)
+
+    // Draw fat (light blue)
     if (f > 0) {
-      paint.color = Colors.grey[400]!;
+      paint.color = lightBlue;
       final sweep = f * 2 * pi;
       canvas.drawArc(rect, start, sweep, true, paint);
     }

@@ -26,5 +26,3 @@ class FitnessApp extends StatelessWidget {
     );
   }
 }
-
-// MainNavigation is defined in screens/main_navigation.dart

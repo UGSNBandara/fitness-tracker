@@ -1,10 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
 import '../services/nutrition_service.dart';
 import '../services/profile_picture_service.dart';
+import '../services/firebase_exercise_service.dart';
+
+// Blue Theme Colors
+const Color primaryBlue = Color(0xFF0066FF);
+const Color lightBlue = Color(0xFFE0F0FF);
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,11 +23,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
   bool _isLoading = true;
 
-  // Activity stats (would come from exercise logs in a real app)
-  int _workoutsThisWeek = 5;
-  int _caloriesBurned = 2450;
-  int _activeDays = 6;
-  int _streak = 12;
+  // Activity stats from exercise logs
+  Future<Map<String, dynamic>> _getWorkoutStats() async {
+    try {
+      // Get workout logs from Firebase (same as exercise screen)
+      final logsData = await FirebaseExerciseService.instance.getWorkoutLogs();
+
+      int totalWorkouts = logsData.length;
+      int totalCalories = 0;
+      int totalMinutes = 0;
+
+      for (final log in logsData) {
+        totalCalories += (log['caloriesBurned'] as num?)?.toInt() ?? 0;
+        final duration = log['duration'] as int? ?? 0;
+        totalMinutes += (duration / 60000).round();
+      }
+
+      int averageCaloriesPerWorkout = totalWorkouts > 0
+          ? (totalCalories / totalWorkouts).round()
+          : 0;
+
+      return {
+        'totalWorkouts': totalWorkouts,
+        'totalCalories': totalCalories,
+        'totalMinutes': totalMinutes,
+        'averageCaloriesPerWorkout': averageCaloriesPerWorkout,
+      };
+    } catch (e) {
+      return {
+        'totalWorkouts': 0,
+        'totalCalories': 0,
+        'totalMinutes': 0,
+        'averageCaloriesPerWorkout': 0,
+      };
+    }
+  }
 
   // Nutrition summary data
   Map<String, dynamic>? _nutritionSummary;
@@ -85,9 +121,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() => _profilePictureLoading = true);
 
-      final file = File(image.path);
-      final url = await ProfilePictureService.instance.uploadProfilePicture(file);
-      
+      String url;
+      if (kIsWeb) {
+        // For web platform, use bytes
+        final bytes = await image.readAsBytes();
+        url = await ProfilePictureService.instance
+            .uploadProfilePictureFromBytes(bytes, image.name);
+      } else {
+        // For mobile platforms, use File
+        final file = File(image.path);
+        url = await ProfilePictureService.instance.uploadProfilePicture(file);
+      }
+
       setState(() {
         _profilePictureUrl = url;
         _profilePictureLoading = false;
@@ -198,21 +243,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       labelText: 'Name',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor: lightBlue,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(
+                          color: primaryBlue.withOpacity(0.3),
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(
+                          color: primaryBlue.withOpacity(0.3),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Colors.grey[900]!,
-                          width: 2,
-                        ),
+                        borderSide: BorderSide(color: primaryBlue, width: 2),
                       ),
                     ),
                   ),
@@ -239,25 +285,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       labelText: 'Date of Birth',
                       labelStyle: TextStyle(color: Colors.grey[600]),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor: lightBlue,
                       suffixIcon: Icon(
                         Icons.calendar_today,
-                        color: Colors.grey[600],
+                        color: primaryBlue,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(
+                          color: primaryBlue.withOpacity(0.3),
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                        borderSide: BorderSide(
+                          color: primaryBlue.withOpacity(0.3),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Colors.grey[900]!,
-                          width: 2,
-                        ),
+                        borderSide: BorderSide(color: primaryBlue, width: 2),
                       ),
                     ),
                   ),
@@ -272,19 +319,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             labelText: 'Height (cm)',
                             labelStyle: TextStyle(color: Colors.grey[600]),
                             filled: true,
-                            fillColor: Colors.grey[50],
+                            fillColor: lightBlue,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                color: primaryBlue.withOpacity(0.3),
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                color: primaryBlue.withOpacity(0.3),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey[900]!,
+                                color: primaryBlue,
                                 width: 2,
                               ),
                             ),
@@ -300,19 +351,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             labelText: 'Weight (kg)',
                             labelStyle: TextStyle(color: Colors.grey[600]),
                             filled: true,
-                            fillColor: Colors.grey[50],
+                            fillColor: lightBlue,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                color: primaryBlue.withOpacity(0.3),
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
+                              borderSide: BorderSide(
+                                color: primaryBlue.withOpacity(0.3),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey[900]!,
+                                color: primaryBlue,
                                 width: 2,
                               ),
                             ),
@@ -332,12 +387,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            side: BorderSide(color: Colors.grey[300]!),
+                            side: BorderSide(
+                              color: primaryBlue.withOpacity(0.3),
+                            ),
                           ),
                           child: Text(
                             'Cancel',
                             style: TextStyle(
-                              color: Colors.grey[700],
+                              color: primaryBlue,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -390,7 +447,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[900],
+                            backgroundColor: primaryBlue,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -422,7 +479,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: lightBlue,
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
@@ -442,7 +499,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_user == null) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: lightBlue,
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
@@ -469,6 +526,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: _loadUserProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryBlue,
+                  foregroundColor: Colors.white,
+                ),
                 child: const Text('Retry'),
               ),
             ],
@@ -478,7 +539,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: lightBlue,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -516,36 +577,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Stack(
                     children: [
                       GestureDetector(
-                        onTap: _profilePictureLoading ? null : _pickAndUploadProfilePicture,
+                        onTap: _profilePictureLoading
+                            ? null
+                            : _pickAndUploadProfilePicture,
                         child: Container(
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: lightBlue,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey[300]!,
-                              width: 3,
-                            ),
+                            border: Border.all(color: primaryBlue, width: 3),
                           ),
                           child: ClipOval(
                             child: _profilePictureLoading
-                                ? const Center(child: CircularProgressIndicator())
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
                                 : _profilePictureUrl != null
-                                    ? Image.network(
-                                        _profilePictureUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/images/profile_pic/chad.jpg',
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
+                                ? Image.network(
+                                    _profilePictureUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
                                         'assets/images/profile_pic/chad.jpg',
                                         fit: BoxFit.cover,
-                                      ),
+                                      );
+                                    },
+                                  )
+                                : Image.asset(
+                                    'assets/images/profile_pic/chad.jpg',
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                       ),
@@ -553,12 +615,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         bottom: 0,
                         right: 0,
                         child: GestureDetector(
-                          onTap: _profilePictureLoading ? null : _pickAndUploadProfilePicture,
+                          onTap: _profilePictureLoading
+                              ? null
+                              : _pickAndUploadProfilePicture,
                           child: Container(
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.grey[900],
+                              color: primaryBlue,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
@@ -592,13 +656,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: lightBlue,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.edit_outlined,
                             size: 18,
-                            color: Colors.grey[700],
+                            color: primaryBlue,
                           ),
                         ),
                       ),
@@ -671,9 +735,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: lightBlue,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey[200]!),
+                      border: Border.all(color: primaryBlue.withOpacity(0.2)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -756,48 +820,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActivityCard(
-                          icon: Icons.fitness_center,
-                          label: 'Workouts',
-                          value: '$_workoutsThisWeek',
-                          unit: 'this week',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _ActivityCard(
-                          icon: Icons.local_fire_department_outlined,
-                          label: 'Calories',
-                          value: '$_caloriesBurned',
-                          unit: 'burned',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActivityCard(
-                          icon: Icons.calendar_today_outlined,
-                          label: 'Active Days',
-                          value: '$_activeDays',
-                          unit: 'this week',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _ActivityCard(
-                          icon: Icons.whatshot_outlined,
-                          label: 'Streak',
-                          value: '$_streak',
-                          unit: 'days',
-                        ),
-                      ),
-                    ],
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _getWorkoutStats(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final stats = snapshot.data!;
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _ProfileStatCard(
+                                  label: 'Total Workouts',
+                                  value: '${stats['totalWorkouts']}',
+                                  icon: Icons.fitness_center,
+                                  color: primaryBlue,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _ProfileStatCard(
+                                  label: 'Total Calories',
+                                  value: '${stats['totalCalories']}',
+                                  unit: 'cal',
+                                  icon: Icons.local_fire_department,
+                                  color: primaryBlue,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _ProfileStatCard(
+                                  label: 'Total Time',
+                                  value: '${stats['totalMinutes']}',
+                                  unit: 'min',
+                                  icon: Icons.schedule,
+                                  color: primaryBlue,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _ProfileStatCard(
+                                  label: 'Avg Calories',
+                                  value:
+                                      '${stats['averageCaloriesPerWorkout']}',
+                                  unit: 'per',
+                                  icon: Icons.show_chart,
+                                  color: primaryBlue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -843,9 +930,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: lightBlue,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey[200]!),
+                        border: Border.all(color: primaryBlue.withOpacity(0.2)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -883,7 +970,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.grey[900],
                               borderRadius: BorderRadius.circular(12),
@@ -969,7 +1059,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
                           children: [
-                            Icon(Icons.restaurant_outlined, size: 48, color: Colors.grey[400]),
+                            Icon(
+                              Icons.restaurant_outlined,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               'No nutrition data available',
@@ -1012,13 +1106,13 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: lightBlue,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: primaryBlue.withOpacity(0.2)),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 24, color: Colors.grey[700]),
+          Icon(icon, size: 24, color: primaryBlue),
           const SizedBox(height: 8),
           Text(
             value,
@@ -1052,57 +1146,58 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _ActivityCard extends StatelessWidget {
-  final IconData icon;
+class _ProfileStatCard extends StatelessWidget {
   final String label;
   final String value;
-  final String unit;
+  final String? unit;
+  final IconData icon;
+  final Color color;
 
-  const _ActivityCard({
-    required this.icon,
+  const _ProfileStatCard({
     required this.label,
     required this.value,
-    required this.unit,
+    this.unit,
+    required this.icon,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: lightBlue,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: primaryBlue.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 24, color: Colors.grey[700]),
-          const SizedBox(height: 12),
+          Icon(icon, size: 22, color: color),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
-              height: 1,
+              color: color,
             ),
           ),
+          if (unit != null)
+            Text(
+              unit!,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            unit,
-            style: TextStyle(
               fontSize: 11,
-              color: Colors.grey[500],
+              color: Colors.grey.shade700,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1111,6 +1206,7 @@ class _ActivityCard extends StatelessWidget {
     );
   }
 }
+
 class _NutritionMacroCard extends StatelessWidget {
   final String label;
   final int value;
@@ -1129,13 +1225,13 @@ class _NutritionMacroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: lightBlue,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: primaryBlue.withOpacity(0.2)),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 24, color: Colors.grey[700]),
+          Icon(icon, size: 24, color: primaryBlue),
           const SizedBox(height: 8),
           Text(
             '$value',
@@ -1184,7 +1280,7 @@ class _TotalStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: Colors.grey[700]),
+        Icon(icon, size: 24, color: primaryBlue),
         const SizedBox(height: 8),
         Text(
           '$value',

@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProfilePictureService {
   ProfilePictureService._();
@@ -21,6 +23,33 @@ class ProfilePictureService {
     try {
       final ref = _storage.ref().child('profile_pictures/$_userId.jpg');
       await ref.putFile(imageFile);
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Save URL to Firestore
+      await _db.collection('users').doc(_userId).set({
+        'profilePictureUrl': downloadUrl,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Failed to upload profile picture: $e');
+    }
+  }
+
+  /// Upload profile picture from bytes (for web platform)
+  Future<String> uploadProfilePictureFromBytes(
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    if (_userId == null) throw Exception('Not authenticated');
+
+    try {
+      final ref = _storage.ref().child('profile_pictures/$_userId.jpg');
+      await ref.putData(
+        imageBytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
       final downloadUrl = await ref.getDownloadURL();
 
       // Save URL to Firestore
